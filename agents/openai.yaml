@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: OpenSpec Delivery
+  short_description: 使用 OpenSpec artifacts 和 Superpowers execution discipline 驱动 scoped delivery。
+  default_prompt: 使用该 workflow 将任务推进到 OpenSpec proposal/spec/design/tasks artifacts，并用 Superpowers 执行；frontend implementation 前必须先使用 web-design-engineer。
