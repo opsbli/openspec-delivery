@@ -59,7 +59,7 @@ The anchoring instruction is a self-contained addition to the system prompt.
 2. 你计划用什么步骤完成
 3. 你还缺什么信息
 
-这段中文必须是 agent 的第一个主动输出。完成这段输出后，才能开始执行具体任务。
+这段中文必须是 agent 的第一个主动输出。完成这段输出后，才能开始执行具体任务。为节省 token，这段锚定最多 3 句；tiny task 可压缩为 1 句。
 
 ## 适用范围
 
@@ -71,21 +71,56 @@ The anchoring instruction is a self-contained addition to the system prompt.
 - 不影响 behavior 的极小文案或格式修改
 - 用户明确要求覆盖此流程
 
+## Token 预算与轻量路径
+
+默认按任务规模选择最小可行流程，不把所有请求都升级为完整 OpenSpec + Superpowers 执行。
+
+### 任务分级
+
+- **Tiny**：单文件、非行为变更或极小文案/格式/说明调整。跳过 OpenSpec artifacts，只做定位、编辑、最小验证和简短总结。
+- **Small**：1-2 个文件的小范围规则、文档、测试或局部行为调整。使用 compact OpenSpec artifacts；通常只需要 `proposal.md` 和 `tasks.md`，除非影响 externally observable behavior 才写 `spec.md`。
+- **Meaningful**：影响用户可见行为、API、数据流、UX、跨模块协作或有回归风险。使用完整 OpenSpec artifacts。
+- **Substantial**：多模块、多阶段、需要设计取舍或并行协作。使用完整 OpenSpec + 必要 Superpowers skills，可考虑 worktree 和 review。
+
+### Token 预算规则
+
+1. 先定位再读取：优先 `rg` / file list / targeted snippets，不默认整文件读取。
+2. 只传递当前任务需要的上下文；不要重复项目背景、已知规则或已生成内容。
+3. 输出按阶段生成：先生成当前部分、当前模块或当前测试，不一次性展开全套文档。
+4. 对文档任务，默认写简洁要点；每个章节只保留目标、变化、验收和风险。
+5. 对代码任务，默认只生成/修改当前模块；避免重复已有逻辑和无关代码。
+6. 对测试任务，默认只写当前行为的最小测试；不重新生成整个测试脚本。
+7. references、examples 和 external docs 只在直接需要时读取；读取后提炼要点，不把长内容复制进 artifacts。
+8. final response 默认短格式：改了什么、怎么验证、还有什么风险。
+
+### Compact Artifact 模板
+
+Small change 可使用压缩 OpenSpec 记录：
+
+- `proposal.md`：`Why` 1-3 条、`Scope` 1-5 条、`Non-Goals` 1-5 条、`Acceptance Criteria` 1-5 条。
+- `tasks.md`：每个任务一行，格式为“动作 + 验证点”，避免长解释。
+- `spec.md`：只写 externally observable delta；没有用户可见行为变化时可省略。
+- `design.md`：只有 architecture、API、data flow、UX 或跨模块行为需要解释时才创建。
+
+如果 compact 记录无法清晰表达验收边界，升级为完整 artifacts。
+
 ## 运行模型
 
 按以下顺序执行：
 
-1. 创建新 artifacts 前，先检查是否已有 `openspec/changes/<change-id>/`。
-2. 如果请求仍是想法阶段，先创建或 refine OpenSpec change。
-3. 如果请求指向已有 change，先读取 `proposal.md`、存在时的 `design.md`、所有 `specs/**/spec.md` 和 `tasks.md`，再编辑 code。
-4. 保持 proposal、design、specs、tasks 职责分离：
+1. 先判断任务分级，选择 tiny、small、meaningful 或 substantial 路径。
+2. 创建新 artifacts 前，先用最小命令检查是否已有 `openspec/changes/<change-id>/`。
+3. 如果请求仍是想法阶段，先创建或 refine OpenSpec change；small change 使用 compact artifacts。
+4. 如果请求指向已有 change，优先读取 `tasks.md` 和相关 artifact 片段；只有需要时才读取完整 `proposal.md`、`design.md`、所有 `specs/**/spec.md`。
+5. 只围绕当前任务更新相关 artifacts，不重复已知背景或无关章节。
+6. 保持 proposal、design、specs、tasks 职责分离：
    - `proposal.md` 说明 why、scope 和 non-goals
    - `design.md` 说明关键 technical 与 UX decisions
    - `specs/**/spec.md` 定义 externally observable behavior
    - `tasks.md` 定义 execution checklist
-5. 将 `tasks.md` 转换为 implementation plan。
-6. 按下方映射选择必要的 Superpowers skills。
-7. 先验证 code，再验证 artifact coherence，最后 close 或 archive change。
+7. 将 `tasks.md` 转换为简短 execution plan；small change 的 plan 可直接体现在 `tasks.md`。
+8. 按下方映射选择必要的 Superpowers skills；未触发则不加载。
+9. 先验证 code，再验证 artifact coherence，最后 close 或 archive change。
 
 ## Superpowers 映射
 
@@ -102,6 +137,8 @@ The anchoring instruction is a self-contained addition to the system prompt.
 - 声称成功前：用 `superpowers:verification-before-completion`。
 - verification 后需要 handoff 或 branch wrap-up：如果任务包含分支收尾，用 `superpowers:finishing-a-development-branch`。
 
+默认不预加载 Superpowers skills。只有当前阶段马上需要某个 skill 的具体规则时，才读取对应 `SKILL.md`；读取时只读必要段落，避免把完整执行栈放进上下文。
+
 如果 repository 有更严格的本地指令，同时遵守本地指令。
 
 ## OpenSpec 规则
@@ -109,10 +146,10 @@ The anchoring instruction is a self-contained addition to the system prompt.
 proposal 阶段：
 
 1. 创建聚焦的 change id。
-2. 先写 `proposal.md`。
+2. 先写 `proposal.md`；small change 使用 compact `proposal.md`，不要复述项目背景。
 3. 当 architecture、API shape、UX behavior、data flow 或 migration logic 需要推理时，添加 `design.md`。
-4. 围绕 user-visible 或 externally observable behavior 编写 `specs/**/spec.md`。
-5. 将 `tasks.md` 写成具体 execution checklist。
+4. 围绕 user-visible 或 externally observable behavior 编写 `specs/**/spec.md`；没有 observable delta 时不创建 spec。
+5. 将 `tasks.md` 写成具体 execution checklist；每条任务只描述当前变化和验证点。
 6. 保持 non-goals 可见；如果 `proposal.md` 定义了 non-goals，要同步到 `tasks.md` 或 execution plan，防止实现者随意扩大 scope。
 7. 当用户使用中文沟通时，完成 artifacts 初稿后立即执行 artifact language review，确保正文以中文为主。
 
@@ -120,7 +157,7 @@ proposal 阶段：
 
 implementation 阶段：
 
-1. 读取当前 change 的所有可用 artifacts。
+1. 读取当前 change 的最小必要 artifacts；优先读取 `tasks.md` 和相关 spec 片段，不默认读取全部。
 2. 不要只凭记忆或 chat summary 写 code。
 3. 把 `tasks.md` 当成 executable control，而不是普通 checklist。
 4. 执行时持续更新 `tasks.md`。
@@ -181,13 +218,22 @@ substantial change 需要两阶段 review：
 
 按阶段保持 context 窄：
 
-- Proposal/design 阶段：加载 OpenSpec artifacts，不加载完整 execution stack。
-- Implementation 阶段：加载 `tasks.md`、相关 OpenSpec artifacts，以及必要的 Superpowers skills。
-- Verification/archive 阶段：加载 specs、tasks 和 verification evidence，避免不必要的 planning context。
+- Proposal/design 阶段：只加载与当前 change 直接相关的 OpenSpec artifacts，不加载完整 execution stack。
+- Implementation 阶段：优先加载 `tasks.md`、目标文件片段、相关 spec 片段，以及马上要用的 Superpowers skill 段落。
+- Verification/archive 阶段：只加载 specs、tasks 和 verification evidence，避免不必要的 planning context。
 
 优先使用小而准确的 active skill set，不要加载所有可用 skill。
 
 具体加载预设见 [references/recommended-skill-sets.md](references/recommended-skill-sets.md)。
+
+### 上下文压缩规则
+
+- 不重复粘贴已读取的长文档；后续只引用文件路径和关键结论。
+- 不把完整 diff、完整 spec、完整 README 放进回复，除非用户明确要求。
+- 搜索命中后只读取相关区块；需要整文件时先说明原因。
+- 多轮执行时，只总结变化部分、未完成任务和下一步，不复述完整计划。
+- 生成文档时按章节逐步生成；用户只要某一部分时，不输出其它章节。
+- 生成代码时只输出当前函数、当前模块或 patch，不重述项目背景。
 
 ## 不可妥协约束
 
@@ -214,11 +260,19 @@ substantial change 需要两阶段 review：
 
 报告完成前：
 
-1. 运行相关 tests、lint、build、typecheck 或 targeted checks。
-2. 确认 implementation 匹配 `proposal.md`、`design.md`、`specs/**/spec.md` 和 `tasks.md`。
+1. 运行相关 tests、lint、build、typecheck 或 targeted checks；tiny/small change 可使用 targeted verification。
+2. 确认 implementation 匹配本次读取或更新的 relevant artifacts；不为完成检查重新加载无关 artifacts。
 3. 当用户使用中文沟通时，确认 OpenSpec artifacts 正文语言符合“Artifact 语言检查”要求。
 4. 明确说明 skipped checks、open risks 或 artifact mismatches。
 5. 当 OpenSpec tooling 可用时，优先先 `verify` 再 `archive`。
+
+最终回复默认不超过 5 条要点，只包含：
+
+- 修改的核心文件
+- 关键行为变化
+- verification 命令和结果
+- skipped checks 或剩余风险
+- 需要用户接手的下一步（如有）
 
 ## 推荐结束状态
 
