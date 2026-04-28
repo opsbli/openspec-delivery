@@ -31,6 +31,10 @@
 
 实现前先明确假设、歧义和取舍；不能安全假设时先问。
 
+先判断任务规模，按 `SKILL.md` 的 `Token 预算与轻量路径` 选择 tiny、small、meaningful 或 substantial 路径。小改动不要默认展开完整 OpenSpec、Superpowers、references 或长输出。
+
+读取上下文时先定位再读取：优先 `rg`、文件列表和 targeted snippets，只加载当前任务需要的片段。
+
 优先选择满足需求的最小方案，不添加未请求的抽象、配置化或未来扩展点。
 
 只做外科手术式改动。每个 changed line 都应能追溯到用户请求、OpenSpec artifacts 或 verification 需要；无关清理只报告，不顺手修改。
@@ -38,6 +42,8 @@
 将任务转成可验证目标。多步骤工作要给每个关键步骤定义 verification point，完成前必须有新鲜的验证证据。
 
 使用 subagent、外部模型或工具时，Claude 仍负责最终整合、复核和验证；不要把工具输出直接当作事实或完成状态。
+
+最终回复默认简短，只说明核心文件、关键变化、verification 结果和剩余风险。
 
 ## Frontend Rule
 

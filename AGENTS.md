@@ -42,6 +42,18 @@
 
 完成这段说明后再执行 tool call、文件操作或实现推理。若用户明确要求直接执行极小命令，可保持一句话锚定。
 
+## Token 预算与轻量路径
+
+默认按任务规模选择最小可行流程，详细规则以 `SKILL.md` 的 `Token 预算与轻量路径` 为准。
+
+- Tiny：单文件、非行为变更或极小文案/格式调整，跳过 OpenSpec artifacts，只做定位、编辑、最小验证和简短总结。
+- Small：1-2 个文件的小范围规则、文档、测试或局部行为调整，使用 compact artifacts，通常只需要 `proposal.md` 和 `tasks.md`。
+- Meaningful/Substantial：影响用户可见行为、API、数据流、UX、跨模块协作或有回归风险时，使用完整 OpenSpec workflow。
+
+执行时优先先定位再读取：用 `rg`、文件列表和 targeted snippets 获取当前任务所需上下文，不默认读取完整文件、完整 references 或完整 Superpowers 执行栈。
+
+输出默认精简：不重复项目背景、已知规则或已完成内容；只报告当前变化、验证结果和剩余风险。
+
 ## 必需工作流
 
 任何 feature、bugfix、refactor 或行为变更都必须遵循：
@@ -147,7 +159,7 @@ implementation 前需要将任务拆成小颗粒度：
 - 当 implementation 发现 scope 或 approach 需要变化时，先更新 artifacts。
 - 执行期间保持 `tasks.md` 最新，已完成工作要反映到 checkbox。
 - spec review 与 code quality review 必须分开。
-- 按阶段加载最小必要上下文，不要一次加载所有 skill 和 docs。
+- 按阶段加载最小必要上下文，不要一次加载所有 skill 和 docs；Superpowers skills 只在当前阶段马上需要时读取。
 
 ## 多模型与工具协作
 
@@ -165,7 +177,7 @@ implementation 前需要将任务拆成小颗粒度：
 报告完成前必须：
 
 1. 运行当前 repo 最强可用 checks，例如 tests、lint、build、typecheck 或 targeted verification。
-2. 重新阅读当前 OpenSpec change artifacts，确认 implementation 与 artifacts 一致。
+2. 重新阅读当前 OpenSpec change 的 relevant artifacts，确认 implementation 与 artifacts 一致；tiny/small change 可使用 targeted verification。
 3. 当用户使用中文沟通时，确认 OpenSpec artifacts 正文语言以中文为主，并保留必要 OpenSpec 英文标记。
 4. 明确说明仍存在的 unresolved risks、gaps 或 skipped checks。
 5. 如果 OpenSpec tooling 可用，先 `verify` 再 `archive`。

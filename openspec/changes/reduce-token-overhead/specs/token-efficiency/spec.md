@@ -2,7 +2,7 @@
 
 ### Requirement: Token 高效执行
 
-`SKILL.md` SHALL 定义按任务规模选择最小可行流程的规则。
+`SKILL.md` SHALL 定义按任务规模选择最小可行流程的规则，`AGENTS.md` 和 `CLAUDE.md` SHALL 提供简短入口提醒。
 
 #### Scenario: Tiny task
 
@@ -21,6 +21,12 @@
 - **WHEN** agent 需要读取上下文
 - **THEN** agent SHALL 优先使用 `rg`、文件列表和 targeted snippets
 - **AND** agent SHALL 避免默认读取完整文件、完整 references 或完整执行栈
+
+#### Scenario: Entry files
+
+- **WHEN** agent 读取 `AGENTS.md` 或 `CLAUDE.md`
+- **THEN** 入口文件 SHALL 提醒 agent 先判断任务规模
+- **AND** 入口文件 SHALL 指向 `SKILL.md` 作为完整 token 预算规则来源
 
 #### Scenario: Final response
 
