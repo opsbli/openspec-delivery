@@ -50,6 +50,17 @@
 - Small：1-2 个文件的小范围规则、文档、测试或局部行为调整，使用 compact artifacts，通常只需要 `proposal.md` 和 `tasks.md`。
 - Meaningful/Substantial：影响用户可见行为、API、数据流、UX、跨模块协作或有回归风险时，使用完整 OpenSpec workflow。
 
+| 场景 | OpenSpec | Superpowers |
+|---|---|---|
+| 纯解释 / 纯文案 / 纯格式 | 否，通常可跳过 | 否 |
+| Tiny 单文件小改动 | 轻量或跳过 | 仅最小执行纪律 |
+| 需要定义范围 / 验收 / 设计 | 是 | 视情况 |
+| 开始实施 / 写代码 | 是，若是非 trivial 变更 | 是 |
+| 多步骤实现 / 规划 | 是 | `writing-plans` |
+| 功能 / bugfix | 是 | `test-driven-development` |
+| 奇怪 bug / 回归 / flaky | 是 | `systematic-debugging` |
+| substantial review / 验证 / 收尾 | 是 | `requesting-code-review` / `verification-before-completion` |
+
 执行时优先先定位再读取：用 `rg`、文件列表和 targeted snippets 获取当前任务所需上下文，不默认读取完整文件、完整 references 或完整 Superpowers 执行栈。
 
 输出默认精简：不重复项目背景、已知规则或已完成内容；只报告当前变化、验证结果和剩余风险。
@@ -143,10 +154,11 @@ implementation 前需要将任务拆成小颗粒度：
 当任务包含 UI、page、component、interaction、prototype、dashboard 或其他视觉 frontend output 时：
 
 1. 写 frontend code 前必须使用 `web-design-engineer`。
-2. 如果已有 design system，必须保持一致。
-3. 如果没有 design system，先显式定义视觉规则再构建。
-4. 避免 generic filler UI、伪造数据和缺乏意图的组件。
-5. 重要 frontend behavior 和 UX constraints 必须写入 `design.md` 或 `specs/**/spec.md`，不能只留在 code 中。
+2. 当视觉方向、布局策略或交互模式不清晰时，先使用 `ui-ux-pro-max` 做前置设计判断。
+3. 当已有明确 design system、视觉约束或落地方案时，优先使用 `frontend-design` 推进具体实现。
+4. 如果没有 design system，先显式定义视觉规则再构建。
+5. 避免 generic filler UI、伪造数据和缺乏意图的组件。
+6. 重要 frontend behavior 和 UX constraints 必须写入 `design.md` 或 `specs/**/spec.md`，不能只留在 code 中。
 
 不要把 frontend work 当成“只是 implementation”。必须先经过 design reasoning。
 
@@ -171,6 +183,7 @@ implementation 前需要将任务拆成小颗粒度：
 - 不在 overlapping write scopes 上并行编辑；确需并行时，先明确协调策略。
 - 对外部模型给出的事实、API、版本、依赖或安全建议进行来源检查或本地验证。
 - 合并 subagent 结果前检查 diff、运行相关 verification，并确认没有偏离 OpenSpec artifacts。
+- 如果 `code-review-graph` MCP 工具可用，substantial review 或跨文件依赖分析优先使用它生成风险图，再进入人工 review；只采纳高风险节点和依赖边界，不复述整张图。
 
 ## Verification Gate
 

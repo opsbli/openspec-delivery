@@ -45,9 +45,11 @@
 
 最终回复默认简短，只说明核心文件、关键变化、verification 结果和剩余风险。
 
+如果 `code-review-graph` MCP 工具可用，先用它做 substantial review 或跨文件依赖分析，再做人工作业；只带回高风险节点，不复述整张图。
+
 ## Frontend Rule
 
-frontend work 在写 code 前必须先使用 `web-design-engineer`。
+frontend work 在写 code 前必须先使用 `web-design-engineer`。视觉方向不清晰时先用 `ui-ux-pro-max`，已有明确设计系统或落地方案时优先用 `frontend-design`。
 
 ## Maintenance
 

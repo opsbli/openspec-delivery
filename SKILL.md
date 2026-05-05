@@ -195,11 +195,13 @@ worktree 的目的主要是减少 context pollution 和 cross-change mistakes，
 当 change 影响 UI 或 frontend behavior：
 
 1. 写 frontend code 前使用 `web-design-engineer`。
-2. 将 design decisions 视为 spec 的一部分，不是 incidental implementation detail。
-3. 已有 visual system 时保持一致。
-4. 没有 visual system 时，先声明 color、type、spacing、interaction 和 responsive rules。
-5. 避免 generic placeholder product decisions、fake data 和 low-intent layouts。
-6. 重要 UI decisions 要反映在 `design.md` 或 specs 中，不要只留在 implementation code。
+2. 当视觉方向、布局策略或交互模式不清晰时，先使用 `ui-ux-pro-max` 做前置设计判断，再进入实现。
+3. 当已有明确设计系统、视觉约束或落地方案时，使用 `frontend-design` 直接推进具体实现。
+4. 将 design decisions 视为 spec 的一部分，不是 incidental implementation detail。
+5. 已有 visual system 时保持一致。
+6. 没有 visual system 时，先声明 color、type、spacing、interaction 和 responsive rules。
+7. 避免 generic placeholder product decisions、fake data 和 low-intent layouts。
+8. 重要 UI decisions 要反映在 `design.md` 或 specs 中，不要只留在 implementation code。
 
 ## Review 策略
 
@@ -213,6 +215,8 @@ substantial change 需要两阶段 review：
    - 除非 code 暴露真实 spec conflict，否则不重新打开 product scope
 
 两种 review mode 必须分开，不要把 requirement gaps 与 style/refactor opinions 混在一起。
+
+如果 `code-review-graph` MCP 工具可用，substantial change 或跨文件依赖较多的 review 先用它生成风险/依赖图，再做人工 review。工具输出只作为输入，不作为最终判断。
 
 ## Context 加载策略
 
