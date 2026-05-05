@@ -10,7 +10,7 @@
 
 - 在 `SKILL.md` 增加任务分级、轻量路径和 token 预算规则。
 - 在 `AGENTS.md` 和 `CLAUDE.md` 同步轻量入口规则，避免入口文件和 skill 主体语义漂移。
-- 优化 OpenSpec、Superpowers、context loading 和 completion 输出策略。
+- 优化 OpenSpec、Superpowers 按需启用、context loading 和 completion 输出策略。
 - 同步全局安装版本。
 
 ## Non-Goals
@@ -25,4 +25,5 @@
 - context loading 明确要求按需读取、避免重复背景。
 - final response 默认简短。
 - `AGENTS.md` 和 `CLAUDE.md` 能指向 `SKILL.md` 的 token 预算规则，并保留简短执行提醒。
+- Superpowers 仅按需启用，不预加载完整执行栈。
 - 全局安装目录包含更新后的 `SKILL.md`。

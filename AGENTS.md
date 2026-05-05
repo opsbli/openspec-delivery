@@ -94,7 +94,7 @@
 - 只有当任务真正独立且 ownership 明确时，才使用 `superpowers:dispatching-parallel-agents`。
 - 当任务包含 merge、PR 或 branch cleanup 时使用 `superpowers:finishing-a-development-branch`。
 
-优先加载小而准确的 active skill set，不要一次性加载所有 skill。
+只按需启用 Superpowers：先判断当前阶段是否真的需要对应 skill，再读取该 skill 的必要段落；不要一次性加载所有 skill，也不要把完整执行栈放进上下文。
 
 ## Coding Agent 行为规则
 

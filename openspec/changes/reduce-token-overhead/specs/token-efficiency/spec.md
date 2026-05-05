@@ -28,6 +28,12 @@
 - **THEN** 入口文件 SHALL 提醒 agent 先判断任务规模
 - **AND** 入口文件 SHALL 指向 `SKILL.md` 作为完整 token 预算规则来源
 
+#### Scenario: On-demand Superpowers
+
+- **WHEN** agent 进入某个执行阶段但尚未需要特定 Superpowers skill
+- **THEN** agent SHALL 不预加载完整 Superpowers 执行栈
+- **AND** agent SHALL 只在当前阶段马上需要时读取对应 skill 的必要段落
+
 #### Scenario: Final response
 
 - **WHEN** agent 汇报完成结果

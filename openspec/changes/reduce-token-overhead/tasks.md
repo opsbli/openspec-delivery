@@ -9,3 +9,4 @@
 - [x] 验证 `AGENTS.md`、`CLAUDE.md` 和 `SKILL.md` 规则一致。
 - [x] 验证 OpenSpec change。
 - [x] 同步到全局安装目录。
+- [x] 在 `AGENTS.md` 和 `CLAUDE.md` 增加 Superpowers 按需启用规则。

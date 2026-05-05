@@ -43,6 +43,8 @@
 
 使用 subagent、外部模型或工具时，Claude 仍负责最终整合、复核和验证；不要把工具输出直接当作事实或完成状态。
 
+Superpowers 也按需启用：只有当前阶段马上需要对应 skill 时才读它，别一次性展开完整执行栈。
+
 最终回复默认简短，只说明核心文件、关键变化、verification 结果和剩余风险。
 
 如果 `code-review-graph` MCP 工具可用，先用它做 substantial review 或跨文件依赖分析，再做人工作业；只带回高风险节点，不复述整张图。
